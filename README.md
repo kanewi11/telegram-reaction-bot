@@ -19,3 +19,27 @@
 │   98767242365.session
 ```
 8. `nohup python reactionbot.py &`
+
+
+## Sample configuration file *.ini
+You can add more parameters that Pyrogram supports.
+```
+[pyrogram]
+api_id = you_api_id
+api_hash = you_api_hash	
+
+# optional parameters
+app_version = '8.8.5'
+device_model = 'Vertu IVERTU'
+system_version = 'Android'
+```
+
+## Sample configuration file *.json
+You can add more parameters that Pyrogram supports.
+```
+{
+    "api_id": "you_api_id",
+    "api_hash": "you_api_hash",
+    ...
+}
+```
