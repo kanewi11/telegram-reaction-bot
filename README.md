@@ -2,13 +2,14 @@
 **Bot puts reactions only to new posts!**
 
 ## Launch Instructions:
-1. `git clone https://github.com/kanewi11/telegram-reaction-bot.git`
-2. `python3 -m venv venv`
-3. `source venv/bin/activate`
-4. `pip install -r requirements.txt`
-5. Add your channel name to `config.py`.
-6. `mkdir sessions`
-7. **Sessions must be for Pyrogram!** Add the session file and its configuration file to the `/sessions` directory. **These two files must have the same name!** Here is an example:
+1. Create an empty directory
+2. `git clone https://github.com/kanewi11/telegram-reaction-bot.git ./`
+3. `python3 -m venv venv`
+4. `source venv/bin/activate`
+5. `pip install -r requirements.txt`
+6. Add your channel name to `config.py`
+7. `mkdir sessions`
+8. **Sessions must be for Pyrogram!** Add the session file and its configuration file to the `/sessions` directory. **These two files must have the same name!** Here is an example:
 ```
 /sessions
 │   8888888888.ini
@@ -18,7 +19,7 @@
 │   98767242365.json
 │   98767242365.session
 ```
-8. `nohup python reactionbot.py &`
+9. `nohup python reactionbot.py &`
 
 
 ## Sample configuration file *.ini
