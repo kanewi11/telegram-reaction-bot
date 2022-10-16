@@ -9,8 +9,9 @@ import configparser
 from pathlib import Path
 
 import uvloop
-from pyrogram import Client, idle, filters, types
+from pyrogram.errors import ReactionInvalid
 from pyrogram.handlers import MessageHandler
+from pyrogram import Client, idle, filters, types
 
 from config import channels
 
@@ -35,13 +36,16 @@ possible_key_names = {
     'phone_number': ['phone_number', 'phone']
 }
 
-emojis = ['👍', '❤️', '🔥', '🥰', '👏', '😁', '🤔', '🤯', '🎉', '🤩', '⚡️', '💯', '❤️‍🔥', '🙏🏻']
+emojis = ['👍', '❤️', '🔥', '🥰', '👏', '😁', '🤔', '🤯', '🎉', '🤩', '⚡️', '💯', '❤️‍🔥']
 
 
 async def send_reaction(client: Client, message: types.Message) -> None:
     """Хендлер для отправки реакций"""
     emoji = random.choice(emojis)
-    await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
+    try:
+        await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
+    except ReactionInvalid:
+        logging.warning(f'{emoji} - INVALID REACTION')
 
 
 async def make_work_dir() -> None:

@@ -13,9 +13,7 @@
 .idea/**/dictionaries
 .idea/**/shelf
 
-sessions/*.session
-sessions/*.ini
-sessions/*.json
+sessions/*
 test.py
 *.log
 
