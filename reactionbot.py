@@ -15,7 +15,7 @@ from pyrogram.handlers import MessageHandler
 from config import channels
 
 
-ERROR_SLEEP = 20
+TRY_AGAIN_SLEEP = 20
 
 uvloop.install()
 
@@ -142,5 +142,5 @@ if __name__ == '__main__':
         except Exception:
             logging.critical(traceback.format_exc())
 
-        logging.info(f'Ожидание {ERROR_SLEEP} сек до повторного запуска программы')
-        time.sleep(ERROR_SLEEP)
+        logging.info(f'Ожидание {TRY_AGAIN_SLEEP} сек до повторного запуска программы')
+        time.sleep(TRY_AGAIN_SLEEP)
