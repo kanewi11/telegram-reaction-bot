@@ -13,35 +13,24 @@ from pyrogram.errors import ReactionInvalid
 from pyrogram.handlers import MessageHandler
 from pyrogram import Client, idle, filters, types
 
-from config import channels
+from config import CHANNELS, POSSIBLE_KEY_NAMES, EMOJIS
 
 
 TRY_AGAIN_SLEEP = 20
 
 uvloop.install()
 
-logging.basicConfig(filename='logs.log', level=logging.INFO)
+logging.basicConfig(filename='logs.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logging.info('Start reaction bot.')
 
 BASE_DIR = Path(sys.argv[0]).parent
 WORK_DIR = BASE_DIR.joinpath('sessions')
-CONFIG_FILE_EXTENSION = ('ini', 'json')
-
-possible_key_names = {
-    'api_id': ['api_id', 'app_id'],
-    'api_hash': ['api_hash', 'app_hash'],
-    'app_version': ['app_version'],
-    'device_model': ['device_model', 'device'],
-    'system_version': ['system_version', 'sdk'],
-    'phone_number': ['phone_number', 'phone']
-}
-
-emojis = ['👍', '❤️', '🔥', '🥰', '👏', '😁', '🤔', '🤯', '🎉', '🤩', '⚡️', '💯', '❤️‍🔥']
+CONFIG_FILE_SUFFIXES = ('.ini', '.json')
 
 
 async def send_reaction(client: Client, message: types.Message) -> None:
     """Хендлер для отправки реакций"""
-    emoji = random.choice(emojis)
+    emoji = random.choice(EMOJIS)
     try:
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
     except ReactionInvalid:
@@ -57,7 +46,7 @@ async def make_work_dir() -> None:
 
 async def get_config_files_path() -> list[Path]:
     """Берем все конфиг файлы"""
-    return [file for file in WORK_DIR.iterdir() if file.suffix.lower()[1:] in CONFIG_FILE_EXTENSION]
+    return [file for file in WORK_DIR.iterdir() if file.suffix.lower() in CONFIG_FILE_SUFFIXES]
 
 
 async def config_from_ini_file(file_path: Path) -> dict:
@@ -83,7 +72,7 @@ async def get_config(file_path: Path) -> dict:
     extension = file_path.suffix.lower()[1:]
     config = await config[extension](file_path)
     normalized_confing = {'name': file_path.name.split('.')[0]}
-    for key, values in possible_key_names.items():
+    for key, values in POSSIBLE_KEY_NAMES.items():
         for value in values:
             if not config.get(value):
                 continue
@@ -125,12 +114,12 @@ async def main():
         raise ValueError('Нет клиентов!')
 
     for app in apps:
-        message_handler = MessageHandler(send_reaction, filters=filters.chat(channels))
+        message_handler = MessageHandler(send_reaction, filters=filters.chat(CHANNELS))
         app.add_handler(message_handler)
 
         await app.start()
 
-        for channel in channels:
+        for channel in CHANNELS:
             await app.join_chat(channel)
 
     await idle()
