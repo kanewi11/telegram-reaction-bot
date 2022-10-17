@@ -128,12 +128,16 @@ async def main():
         await app.stop()
 
 
+def start():
+    try:
+        asyncio.run(main())
+    except Exception:
+        logging.critical(traceback.format_exc())
+
+    logging.info(f'Ожидание {TRY_AGAIN_SLEEP} сек до повторного запуска программы')
+    time.sleep(TRY_AGAIN_SLEEP)
+
+
 if __name__ == '__main__':
     while True:
-        try:
-            asyncio.run(main())
-        except Exception:
-            logging.critical(traceback.format_exc())
-
-        logging.info(f'Ожидание {TRY_AGAIN_SLEEP} сек до повторного запуска программы')
-        time.sleep(TRY_AGAIN_SLEEP)
+        start()
