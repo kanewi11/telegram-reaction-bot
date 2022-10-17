@@ -22,7 +22,7 @@
 7. `mkdir sessions`
 8. **Sessions must be for [pyrogram](https://github.com/pyrogram/pyrogram)!** 
 
-    Add the session file and its configuration file to the /sessions directory ( _which we created in step 7_ ). 
+    Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 7_ ). 
 
     **These two files must have the same name!** Here is an example:
 
@@ -39,13 +39,27 @@
     ```
 9. `nohup python reactionbot.py &`
 
+## Create a session file manually.
+Create a file `my_account.json` ( _the file name can be anything_ ) in the directory `/sessions` :
+```
+{
+    "api_id": "your_api_id",
+    "api_hash": "your_api_hash",
+    "phone_number": "your_phone_number"
+}
+```
+
+After `$ python reactionbot.py`, in the console go through the account authorization steps and that's it, the session file will be created, you don't need to do this for the next times.
+
+## Where do I get `api_id` and `api_hash`?
+[🔗 Click me.](https://my.telegram.org/auth)
 
 ## Sample configuration file *.ini
 You can add more parameters that [pyrogram](https://github.com/pyrogram/pyrogram) supports.
 ```
 [pyrogram]
-api_id = you_api_id
-api_hash = you_api_hash	
+api_id = your_api_id
+api_hash = your_api_hash	
 
 # optional parameters
 app_version = '8.8.5'
@@ -57,8 +71,8 @@ system_version = 'Android'
 You can add more parameters that [pyrogram](https://github.com/pyrogram/pyrogram) supports.
 ```
 {
-    "api_id": "you_api_id",
-    "api_hash": "you_api_hash",
+    "api_id": "your_api_id",
+    "api_hash": "your_api_hash",
     ...
 }
 ```
