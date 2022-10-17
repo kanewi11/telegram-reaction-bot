@@ -12,7 +12,7 @@
 
 **This script sends reactions to a new post or message in selected open groups and channels, as well as automatically subscribes to them.**
 
-## Launch Instructions:
+## Launch Instructions
 1. Create an empty directory
 2. `git clone https://github.com/kanewi11/telegram-reaction-bot.git ./`
 3. `python3 -m venv venv`
@@ -27,13 +27,15 @@
     **These two files must have the same name!** Here is an example:
 
     ```
-    /sessions
-    │   8888888888.ini
-    │   8888888888.session
-    │   9999999999.ini
-    │   9999999999.session
-    │   98767242365.json
-    │   98767242365.session
+   you_dir
+   └───sessions
+   │   │   8888888888.ini
+   │   │   8888888888.session
+   │   │   9999999999.ini
+   │   │   9999999999.session
+   │   │   98767242365.json
+   │   │   98767242365.session
+   ...
     ```
 9. `nohup python reactionbot.py &`
 
@@ -60,3 +62,7 @@ You can add more parameters that [pyrogram](https://github.com/pyrogram/pyrogram
     ...
 }
 ```
+
+### TODO:
+ - If there will be time to add session definition and conversion from tdata, telethon.
+But I don't think the time will come 🙃.
