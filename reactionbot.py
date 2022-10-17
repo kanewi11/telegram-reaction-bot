@@ -18,18 +18,19 @@ from config import CHANNELS, POSSIBLE_KEY_NAMES, EMOJIS
 
 TRY_AGAIN_SLEEP = 20
 
+BASE_DIR = Path(sys.argv[0]).parent
+WORK_DIR = BASE_DIR.joinpath('sessions')
+
+CONFIG_FILE_SUFFIXES = ('.ini', '.json')
+
 uvloop.install()
 
 logging.basicConfig(filename='logs.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logging.info('Start reaction bot.')
 
-BASE_DIR = Path(sys.argv[0]).parent
-WORK_DIR = BASE_DIR.joinpath('sessions')
-CONFIG_FILE_SUFFIXES = ('.ini', '.json')
-
 
 async def send_reaction(client: Client, message: types.Message) -> None:
-    """Хендлер для отправки реакций"""
+    """Handler for sending reactions"""
     emoji = random.choice(EMOJIS)
     try:
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
@@ -38,19 +39,19 @@ async def send_reaction(client: Client, message: types.Message) -> None:
 
 
 async def make_work_dir() -> None:
-    """Создаем директорию sessions если ее нет"""
+    """Create the sessions directory if it does not exist"""
     if WORK_DIR.exists():
         return
     WORK_DIR.mkdir()
 
 
 async def get_config_files_path() -> list[Path]:
-    """Берем все конфиг файлы"""
+    """Take all the configuration files"""
     return [file for file in WORK_DIR.iterdir() if file.suffix.lower() in CONFIG_FILE_SUFFIXES]
 
 
 async def config_from_ini_file(file_path: Path) -> dict:
-    """Вытаскиваем конфиг из *.ini файла"""
+    """Pull the config from the *.ini file"""
     config_parser = configparser.ConfigParser()
     config_parser.read(file_path)
     section = config_parser.sections()[0]
@@ -58,13 +59,13 @@ async def config_from_ini_file(file_path: Path) -> dict:
 
 
 async def config_from_json_file(file_path: Path) -> dict:
-    """Вытаскиваем конфиг из *.json файла"""
+    """Pull the config from the *.json file"""
     with open(file_path) as f:
         return json.load(f)
 
 
 async def get_config(file_path: Path) -> dict:
-    """Возвращаем конфиг файл по пути"""
+    """Return the config file to the path"""
     config = {
         'ini': config_from_ini_file,
         'json': config_from_json_file,
@@ -83,8 +84,8 @@ async def get_config(file_path: Path) -> dict:
 
 async def create_clients(config_files: list[Path]) -> list[Client]:
     """
-    Создаем экземпляры 'Client' из конфиг файлов.
-    **Если в конфиг файле нет ключа name, то конфиг файл нужно назвать так же как и сессию!**
+    Create 'Client' instances from config files.
+    **If there is no name key in the config file, then the config file has the same name as the session!**
     """
     clients = []
     for config_file in config_files:
@@ -98,12 +99,12 @@ async def create_clients(config_files: list[Path]) -> list[Client]:
 
 async def main():
     """
-    Главная функция:
-        - Создаем директорию sessions если не создана.
-        - Берем все конфиг файлы (*.json, *.ini)
-        - Создаем по конфиг файлам клиентов
-        - Пробегаемся по клиентам, добавляем handler, стартуем, а так же присоединяемся к чату
-        - Ждем завершения и завершаем (бесконечно)
+    Main function:
+        - Create a directory of sessions if not created.
+        - Take all config files (*.json, *.ini)
+        - Create clients by their config files.
+        - Run through clients, add handler, start and join chat
+        - Wait for completion and finish (infinitely)
     """
 
     await make_work_dir()
@@ -129,12 +130,13 @@ async def main():
 
 
 def start():
+    """Let's start"""
     try:
         asyncio.run(main())
     except Exception:
         logging.critical(traceback.format_exc())
 
-    logging.info(f'Ожидание {TRY_AGAIN_SLEEP} сек до повторного запуска программы')
+    logging.info(f'Waiting {TRY_AGAIN_SLEEP} sec. before restarting the program...')
     time.sleep(TRY_AGAIN_SLEEP)
 
 
