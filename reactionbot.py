@@ -23,8 +23,6 @@ WORK_DIR = BASE_DIR.joinpath('sessions')
 
 CONFIG_FILE_SUFFIXES = ('.ini', '.json')
 
-uvloop.install()
-
 logging.basicConfig(filename='logs.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logging.info('Start reaction bot.')
 
@@ -131,6 +129,7 @@ async def main():
 
 def start():
     """Let's start"""
+    uvloop.install()
     try:
         asyncio.run(main())
     except Exception:
@@ -141,5 +140,4 @@ def start():
 
 
 if __name__ == '__main__':
-    while True:
-        start()
+    start()
