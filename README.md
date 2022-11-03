@@ -27,7 +27,9 @@
     **These two files must have the same name!** Here is an example:
 
     ```
-   you_dir
+   your_dir
+   └───reactionbot.py
+   │
    └───sessions
    │   │   8888888888.ini
    │   │   8888888888.session
@@ -35,6 +37,8 @@
    │   │   9999999999.session
    │   │   98767242365.json
    │   │   98767242365.session
+   │   │   ...
+   │
    ...
     ```
 9. `nohup python reactionbot.py &`
