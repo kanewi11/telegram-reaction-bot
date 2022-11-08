@@ -1,4 +1,4 @@
-CHANNELS = ['werqrewqrqwr']
+CHANNELS = ['movies_from_planet']
 
 POSSIBLE_KEY_NAMES = {
     'api_id': ['api_id', 'app_id'],
@@ -9,4 +9,4 @@ POSSIBLE_KEY_NAMES = {
     'phone_number': ['phone_number', 'phone']
 }
 
-EMOJIS = ['👍', '❤️', '🔥', '🥰', '👏', '😁', '🤔', '🤯', '🎉', '🤩', '⚡️', '💯', '❤️‍🔥']
+EMOJIS = ['👍', '❤️', '🔥', '🥰', '👏', '😁', '🤔', '🎉', '🤩', '⚡️', '💯', '❤️‍🔥']

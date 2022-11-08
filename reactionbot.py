@@ -134,10 +134,10 @@ def start():
         asyncio.run(main())
     except Exception:
         logging.critical(traceback.format_exc())
-
-    logging.info(f'Waiting {TRY_AGAIN_SLEEP} sec. before restarting the program...')
-    time.sleep(TRY_AGAIN_SLEEP)
+        logging.info(f'Waiting {TRY_AGAIN_SLEEP} sec. before restarting the program...')
+        time.sleep(TRY_AGAIN_SLEEP)
 
 
 if __name__ == '__main__':
-    start()
+    while True:
+        start()
