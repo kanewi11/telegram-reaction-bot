@@ -127,6 +127,9 @@ async def main():
         except OperationalError:
             logging.warning('Error in ' + app.name)
             continue
+        except UserDeactivatedBan:
+            logging.warning('Session banned - ' + app.name)
+            continue
         except Exception:
             logging.warning(traceback.format_exc())
             continue
