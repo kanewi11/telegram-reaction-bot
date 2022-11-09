@@ -1,12 +1,13 @@
 import sys
 import json
+import time
 import random
 import asyncio
 import logging
-import time
 import traceback
 import configparser
 from pathlib import Path
+from sqlite3 import OperationalError
 
 import uvloop
 from pyrogram.errors import ReactionInvalid
@@ -116,7 +117,11 @@ async def main():
         message_handler = MessageHandler(send_reaction, filters=filters.chat(CHANNELS))
         app.add_handler(message_handler)
 
-        await app.start()
+        try:
+            await app.start()
+        except OperationalError:
+            logging.warning(traceback.format_exc())
+            continue
 
         for channel in CHANNELS:
             await app.join_chat(channel)
