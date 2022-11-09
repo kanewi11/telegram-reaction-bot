@@ -8,6 +8,7 @@ import traceback
 import configparser
 from pathlib import Path
 from sqlite3 import OperationalError
+from typing import List, Dict
 
 import uvloop
 from pyrogram.errors import ReactionInvalid
@@ -49,12 +50,12 @@ async def make_work_dir() -> None:
     WORK_DIR.mkdir()
 
 
-async def get_config_files_path() -> list[Path]:
+async def get_config_files_path() -> List[Path]:
     """Take all the configuration files"""
     return [file for file in WORK_DIR.iterdir() if file.suffix.lower() in CONFIG_FILE_SUFFIXES]
 
 
-async def config_from_ini_file(file_path: Path) -> dict:
+async def config_from_ini_file(file_path: Path) -> Dict:
     """Pull the config from the *.ini file"""
     config_parser = configparser.ConfigParser()
     config_parser.read(file_path)
@@ -62,13 +63,13 @@ async def config_from_ini_file(file_path: Path) -> dict:
     return {**config_parser[section]}
 
 
-async def config_from_json_file(file_path: Path) -> dict:
+async def config_from_json_file(file_path: Path) -> Dict:
     """Pull the config from the *.json file"""
     with open(file_path) as f:
         return json.load(f)
 
 
-async def get_config(file_path: Path) -> dict:
+async def get_config(file_path: Path) -> Dict:
     """Return the config file to the path"""
     config = {
         'ini': config_from_ini_file,
@@ -86,7 +87,7 @@ async def get_config(file_path: Path) -> dict:
     return normalized_confing
 
 
-async def create_clients(config_files: list[Path]) -> list[Client]:
+async def create_clients(config_files: List[Path]) -> List[Client]:
     """
     Create 'Client' instances from config files.
     **If there is no name key in the config file, then the config file has the same name as the session!**
