@@ -35,6 +35,7 @@ async def send_reaction(client: Client, message: types.Message) -> None:
     emoji = random.choice(EMOJIS)
     try:
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
+        
     except ReactionInvalid:
         logging.warning(f'{emoji} - INVALID REACTION')
     except UserDeactivatedBan:

@@ -6,7 +6,10 @@ POSSIBLE_KEY_NAMES = {
     'app_version': ['app_version'],
     'device_model': ['device_model', 'device'],
     'system_version': ['system_version', 'sdk'],
-    'phone_number': ['phone_number', 'phone']
+    'phone_number': ['phone_number', 'phone'],
+    'lang_code': ['lang_code'],
+    'ipv6': ['ipv6'],
+    'proxy': ['proxy'],
 }
 
 EMOJIS = ['👍', '❤️', '🔥', '🥰', '👏', '😁', '🤔', '🎉', '🤩', '⚡️', '💯', '❤️‍🔥']
