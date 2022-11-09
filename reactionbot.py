@@ -13,6 +13,7 @@ import uvloop
 from pyrogram.errors import ReactionInvalid
 from pyrogram.handlers import MessageHandler
 from pyrogram import Client, idle, filters, types
+from pyrogram.errors.exceptions.unauthorized_401 import UserDeactivatedBan
 
 from config import CHANNELS, POSSIBLE_KEY_NAMES, EMOJIS
 
@@ -35,6 +36,10 @@ async def send_reaction(client: Client, message: types.Message) -> None:
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
     except ReactionInvalid:
         logging.warning(f'{emoji} - INVALID REACTION')
+    except UserDeactivatedBan:
+        logging.warning('Session banned')
+    except Exception:
+        logging.warning(traceback.format_exc())
 
 
 async def make_work_dir() -> None:
@@ -121,6 +126,9 @@ async def main():
             await app.start()
         except OperationalError:
             logging.warning('Error in ' + app.name)
+            continue
+        except Exception:
+            logging.warning(traceback.format_exc())
             continue
 
         for channel in CHANNELS:
