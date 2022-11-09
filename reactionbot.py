@@ -111,7 +111,7 @@ async def main():
 
     apps = await create_clients(config_files)
     if not apps:
-        raise ValueError('Нет клиентов!')
+        raise ValueError('No apps!')
 
     for app in apps:
         message_handler = MessageHandler(send_reaction, filters=filters.chat(CHANNELS))
@@ -120,7 +120,7 @@ async def main():
         try:
             await app.start()
         except OperationalError:
-            logging.warning(traceback.format_exc())
+            logging.warning('Error in ' + app.name)
             continue
 
         for channel in CHANNELS:
