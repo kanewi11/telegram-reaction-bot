@@ -14,29 +14,40 @@ from telethon.tl.types import User
 class SessionConvertor:
     def __init__(self, session_path: Path, config: Dict, work_dir: Path):
         self.session_path = session_path
+        self.inappropriate_sessions_path = work_dir.joinpath('unnecessary_sessions')
         self.app_id = config['app_id']
         self.app_hash = config['app_hash']
         self.work_dir = work_dir
 
-    async def convert(self):
-        user_data, session_data = self.__get_data_telethon_session()
-        converted_sting_session = self.__get_converted_sting_session(session_data, user_data)
-        await self.__delete_telethon_session()
+    async def convert(self) -> None:
+        """Main func"""
+        user_data, session_data = await self.__get_data_telethon_session()
+        converted_sting_session = await self.__get_converted_sting_session(session_data, user_data)
+        await self.move_file_to_unnecessary(self.session_path)
         await self.__save_pyrogram_session_file(converted_sting_session, session_data)
 
+    async def move_file_to_unnecessary(self, file_path: Path):
+        """Move the unnecessary Telethon session file to the directory with the unnecessary sessions"""
+        if file_path.exists():
+            file_path.rename(self.inappropriate_sessions_path.joinpath(file_path.name))
+
     async def __get_data_telethon_session(self) -> Tuple[User, StringSession]:
-        async with TelegramClient(self.session_path.__str__(), self.app_id, self.app_hash) as client:
+        """Get User and StringSession"""
+        async with TelegramClient(self.session_path.with_suffix('').__str__(), self.app_id, self.app_hash) as client:
             user_data = await client.get_me()
             string_session = StringSession.save(client.session)
             session_data = StringSession(string_session)
-        return user_data, session_data
+            return user_data, session_data
 
     async def __save_pyrogram_session_file(self, session_string: Union[str, Coroutine[Any, Any, str]],
                                            session_data: StringSession):
-        async with Client(session_string, api_id=self.app_id, api_hash=self.app_id,
-                          workdir=self.work_dir.__str__()) as client:
+        """Create session file for pyrogram"""
+        async with Client(self.session_path.stem, session_string=session_string, api_id=self.app_id,
+                          api_hash=self.app_hash, workdir=self.work_dir.__str__()) as client:
             user_data = await client.get_me()
-            client.storage = FileStorage(self.session_path.stem, Path(self.work_dir))
+            client.storage = FileStorage(self.session_path.stem, self.work_dir)
+            client.storage.conn = sqlite3.Connection(self.session_path)
+            client.storage.create()
             await client.storage.dc_id(session_data.dc_id)
             await client.storage.test_mode(False)
             await client.storage.auth_key(session_data.auth_key.key)
@@ -45,12 +56,9 @@ class SessionConvertor:
             await client.storage.is_bot(False)
             await client.storage.save()
 
-    async def __delete_telethon_session(self):
-        if self.session_path.exists():
-            self.session_path.unlink()
-
     @staticmethod
     async def __get_converted_sting_session(session_data: StringSession, user_data: User) -> str:
+        """Convert to sting session"""
         pack = [
             Storage.SESSION_STRING_FORMAT,
             session_data.dc_id,

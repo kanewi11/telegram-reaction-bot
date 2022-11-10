@@ -10,7 +10,10 @@
    </a>
 </p>
 
-**This script sends reactions to a new post or message in selected open groups and channels, as well as automatically subscribes to them.**
+**Automatically converts Telethon sessions to Pyrogram (may not be stable).**
+**As long as the configuration file has the same name as the session file (see below). If you do not comply, it will not work at all 🙃**
+
+_This script sends reactions to a new post or message in selected open groups and channels, as well as automatically subscribes to them._
 
 ## Launch Instructions
 1. Create an empty directory
@@ -80,7 +83,3 @@ You can add more parameters that [pyrogram](https://github.com/pyrogram/pyrogram
     ...
 }
 ```
-
-### TODO:
- - If there will be time to add session definition and conversion from tdata, telethon.
-But I don't think the time will come 🙃.
