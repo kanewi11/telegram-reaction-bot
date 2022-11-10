@@ -8,7 +8,7 @@ import traceback
 import configparser
 from pathlib import Path
 from sqlite3 import OperationalError
-from typing import List, Dict
+from typing import List, Dict, Tuple
 
 import uvloop
 from pyrogram.errors import ReactionInvalid
@@ -17,12 +17,15 @@ from pyrogram import Client, idle, filters, types
 from pyrogram.errors.exceptions.unauthorized_401 import UserDeactivatedBan
 
 from config import CHANNELS, POSSIBLE_KEY_NAMES, EMOJIS
+from convertor import SessionConvertor
 
 
 TRY_AGAIN_SLEEP = 20
 
 BASE_DIR = Path(sys.argv[0]).parent
 WORK_DIR = BASE_DIR.joinpath('sessions')
+BANNED_SESSIONS_DIR = WORK_DIR.joinpath('banned_sessions')
+UNNECESSARY_SESSIONS_DIR = WORK_DIR.joinpath('unnecessary_sessions')
 
 CONFIG_FILE_SUFFIXES = ('.ini', '.json')
 
@@ -35,7 +38,7 @@ async def send_reaction(client: Client, message: types.Message) -> None:
     emoji = random.choice(EMOJIS)
     try:
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
-        
+
     except ReactionInvalid:
         logging.warning(f'{emoji} - INVALID REACTION')
     except UserDeactivatedBan:
@@ -46,9 +49,9 @@ async def send_reaction(client: Client, message: types.Message) -> None:
 
 async def make_work_dir() -> None:
     """Create the sessions directory if it does not exist"""
-    if WORK_DIR.exists():
-        return
-    WORK_DIR.mkdir()
+    WORK_DIR.mkdir(exist_ok=True)
+    UNNECESSARY_SESSIONS_DIR.mkdir(exist_ok=True)
+    BANNED_SESSIONS_DIR.mkdir(exist_ok=True)
 
 
 async def get_config_files_path() -> List[Path]:
@@ -72,13 +75,13 @@ async def config_from_json_file(file_path: Path) -> Dict:
 
 async def get_config(file_path: Path) -> Dict:
     """Return the config file to the path"""
-    config = {
-        'ini': config_from_ini_file,
-        'json': config_from_json_file,
+    config_suffixes = {
+        '.ini': config_from_ini_file,
+        '.json': config_from_json_file,
     }
-    extension = file_path.suffix.lower()[1:]
-    config = await config[extension](file_path)
-    normalized_confing = {'name': file_path.name.split('.')[0]}
+    suffix = file_path.suffix.lower()
+    config = await config_suffixes[suffix](file_path)
+    normalized_confing = {'name': file_path.stem}
     for key, values in POSSIBLE_KEY_NAMES.items():
         for value in values:
             if not config.get(value):
@@ -88,19 +91,45 @@ async def get_config(file_path: Path) -> Dict:
     return normalized_confing
 
 
-async def create_clients(config_files: List[Path]) -> List[Client]:
+async def create_apps(config_files_paths: List[Path]) -> List[Tuple[Client, Dict, Path]]:
     """
     Create 'Client' instances from config files.
     **If there is no name key in the config file, then the config file has the same name as the session!**
     """
-    clients = []
-    for config_file in config_files:
+    apps = []
+    for config_file_path in config_files_paths:
         try:
-            config_dict = await get_config(config_file)
-            clients.append(Client(workdir=WORK_DIR.__str__(), **config_dict))
+            config_dict = await get_config(config_file_path)
+            session_file_path = WORK_DIR.joinpath(config_file_path.with_suffix('.session'))
+            apps.append((Client(workdir=WORK_DIR.__str__(), **config_dict), config_dict, session_file_path))
         except Exception:
             logging.warning(traceback.format_exc())
-    return clients
+    return apps
+
+
+async def try_convert(session_path: Path, config: Dict):
+    """Try to convert the session if the session failed to start in Pyrogram"""
+    convertor = SessionConvertor(session_path, config, BASE_DIR)
+    try:
+        await convertor.convert()
+    except OperationalError:
+        await convertor.move_file_to_unnecessary(session_path)
+        for suffix in CONFIG_FILE_SUFFIXES:
+            config_file_path = session_path.with_suffix(suffix)
+            await convertor.move_file_to_unnecessary(config_file_path)
+        logging.warning('Preservation of the session failed ' + session_path.stem)
+
+
+async def move_session_to_ban_dir(session_path: Path):
+    """Move file to ban dir"""
+    if session_path.exists():
+        session_path.rename(BANNED_SESSIONS_DIR.joinpath(session_path.name))
+
+    for suffix in CONFIG_FILE_SUFFIXES:
+        config_file_path = session_path.with_suffix(suffix)
+        if not session_path.exists():
+            continue
+        config_file_path.rename(BANNED_SESSIONS_DIR.joinpath(config_file_path.name))
 
 
 async def main():
@@ -116,20 +145,21 @@ async def main():
     await make_work_dir()
     config_files = await get_config_files_path()
 
-    apps = await create_clients(config_files)
+    apps = await create_apps(config_files)
     if not apps:
         raise ValueError('No apps!')
 
-    for app in apps:
+    for app, config_dict, session_file_path in apps:
         message_handler = MessageHandler(send_reaction, filters=filters.chat(CHANNELS))
         app.add_handler(message_handler)
 
         try:
             await app.start()
         except OperationalError:
-            logging.warning('Error in ' + app.name)
+            await try_convert(session_file_path, config_dict)
             continue
         except UserDeactivatedBan:
+            await move_session_to_ban_dir(session_file_path)
             logging.warning('Session banned - ' + app.name)
             continue
         except Exception:
@@ -141,7 +171,7 @@ async def main():
 
     await idle()
 
-    for app in apps:
+    for app, _, _ in apps:
         await app.stop()
 
 
