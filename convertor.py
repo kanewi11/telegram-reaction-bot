@@ -15,8 +15,8 @@ class SessionConvertor:
     def __init__(self, session_path: Path, config: Dict, work_dir: Path):
         self.session_path = session_path
         self.inappropriate_sessions_path = work_dir.joinpath('unnecessary_sessions')
-        self.app_id = config['app_id']
-        self.app_hash = config['app_hash']
+        self.api_id = config['api_id']
+        self.api_hash = config['api_hash']
         self.work_dir = work_dir
 
     async def convert(self) -> None:
@@ -33,7 +33,7 @@ class SessionConvertor:
 
     async def __get_data_telethon_session(self) -> Tuple[User, StringSession]:
         """Get User and StringSession"""
-        async with TelegramClient(self.session_path.with_suffix('').__str__(), self.app_id, self.app_hash) as client:
+        async with TelegramClient(self.session_path.with_suffix('').__str__(), self.api_id, self.api_hash) as client:
             user_data = await client.get_me()
             string_session = StringSession.save(client.session)
             session_data = StringSession(string_session)
@@ -42,8 +42,8 @@ class SessionConvertor:
     async def __save_pyrogram_session_file(self, session_string: Union[str, Coroutine[Any, Any, str]],
                                            session_data: StringSession):
         """Create session file for pyrogram"""
-        async with Client(self.session_path.stem, session_string=session_string, api_id=self.app_id,
-                          api_hash=self.app_hash, workdir=self.work_dir.__str__()) as client:
+        async with Client(self.session_path.stem, session_string=session_string, api_id=self.api_id,
+                          api_hash=self.api_hash, workdir=self.work_dir.__str__()) as client:
             user_data = await client.get_me()
             client.storage = FileStorage(self.session_path.stem, self.work_dir)
             client.storage.conn = sqlite3.Connection(self.session_path)
