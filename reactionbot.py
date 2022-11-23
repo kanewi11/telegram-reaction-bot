@@ -29,7 +29,7 @@ UNNECESSARY_SESSIONS_DIR = WORK_DIR.joinpath('unnecessary_sessions')
 
 CONFIG_FILE_SUFFIXES = ('.ini', '.json')
 
-logging.basicConfig(filename='logs.log', level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+logging.basicConfig(filename='logs.log', level=logging.WARNING, format='%(asctime)s %(levelname)s %(message)s')
 logging.info('Start reaction bot.')
 
 
@@ -109,7 +109,7 @@ async def create_apps(config_files_paths: List[Path]) -> List[Tuple[Client, Dict
 
 async def try_convert(session_path: Path, config: Dict):
     """Try to convert the session if the session failed to start in Pyrogram"""
-    convertor = SessionConvertor(session_path, config, BASE_DIR)
+    convertor = SessionConvertor(session_path, config, WORK_DIR)
     try:
         await convertor.convert()
     except OperationalError:
@@ -147,7 +147,7 @@ async def main():
 
     apps = await create_apps(config_files)
     if not apps:
-        raise ValueError('No apps!')
+        raise Exception('No apps!')
 
     for app, config_dict, session_file_path in apps:
         message_handler = MessageHandler(send_reaction, filters=filters.chat(CHANNELS))
@@ -178,8 +178,9 @@ async def main():
 def start():
     """Let's start"""
     uvloop.install()
+    loop = asyncio.get_event_loop()
     try:
-        asyncio.run(main())
+        loop.run_until_complete(main())
     except Exception:
         logging.critical(traceback.format_exc())
         logging.info(f'Waiting {TRY_AGAIN_SLEEP} sec. before restarting the program...')

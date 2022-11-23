@@ -1,4 +1,4 @@
-CHANNELS = ['movies_from_planet']
+CHANNELS = ['asdksdjfnskjdfn']
 
 POSSIBLE_KEY_NAMES = {
     'api_id': ['api_id', 'app_id'],

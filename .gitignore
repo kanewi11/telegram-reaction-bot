@@ -17,6 +17,8 @@ test_sessions/*
 sessions/*
 test.py
 *.log
+.DS_Store
+
 
 # AWS User-specific
 .idea/**/aws.xml
