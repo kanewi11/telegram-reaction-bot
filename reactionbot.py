@@ -159,17 +159,23 @@ async def main():
             await app.start()
         except OperationalError:
             await try_convert(session_file_path, config_dict)
+            apps.remove((app, config_dict, session_file_path))
             continue
         except UserDeactivatedBan:
             await move_session_to_ban_dir(session_file_path)
             logging.warning('Session banned - ' + app.name)
+            apps.remove((app, config_dict, session_file_path))
             continue
         except Exception:
+            apps.remove((app, config_dict, session_file_path))
             logging.warning(traceback.format_exc())
             continue
 
         for channel in CHANNELS:
             await app.join_chat(channel)
+
+    if not apps:
+        raise Exception('No apps!')
 
     await idle()
 
