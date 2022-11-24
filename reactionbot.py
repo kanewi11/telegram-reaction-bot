@@ -113,10 +113,12 @@ async def try_convert(session_path: Path, config: Dict):
     try:
         await convertor.convert()
     except OperationalError:
-        await convertor.move_file_to_unnecessary(session_path)
+        if session_path.exists():
+            await convertor.move_file_to_unnecessary(session_path)
         for suffix in CONFIG_FILE_SUFFIXES:
             config_file_path = session_path.with_suffix(suffix)
-            await convertor.move_file_to_unnecessary(config_file_path)
+            if config_file_path.exists():
+                await convertor.move_file_to_unnecessary(config_file_path)
         logging.warning('Preservation of the session failed ' + session_path.stem)
 
 
