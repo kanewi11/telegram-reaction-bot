@@ -127,7 +127,7 @@ async def move_session_to_ban_dir(session_path: Path):
 
     for suffix in CONFIG_FILE_SUFFIXES:
         config_file_path = session_path.with_suffix(suffix)
-        if not session_path.exists():
+        if not config_file_path.exists():
             continue
         config_file_path.rename(BANNED_SESSIONS_DIR.joinpath(config_file_path.name))
 
