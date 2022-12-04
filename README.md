@@ -25,14 +25,15 @@ _This script sends reactions to a new post or message in selected open groups an
 4. `source venv/bin/activate`
 5. `pip install -r requirements.txt`
 6. Add your channel name to `config.py`
-7. `mkdir sessions`
-   8. **Sessions must be for [pyrogram](https://github.com/pyrogram/pyrogram)!** 
+7. **IF YOU PLAN TO USE THE TDATA CONVERTER** go to the file `converters/tdata_to_telethon.py` and insert your `API_HASH` and `API_ID` (lines 19 and 20)
+8. `mkdir sessions`
+9. **Sessions must be for [pyrogram](https://github.com/pyrogram/pyrogram)!** 
 
-       Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 7_ ). 
+    Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 7_ ). 
 
-       **These two files must have the same name!** Here is an example:
+    **These two files must have the same name!** Here is an example:
 
-       ```
+   ```
       your_dir
       └───reactionbot.py
       │
@@ -49,8 +50,8 @@ _This script sends reactions to a new post or message in selected open groups an
       │   └───your_tdata
       │   │   │ ...
       ...
-       ```
-9. `nohup python reactionbot.py &`
+   ```
+10. `nohup python reactionbot.py &`
 
 ## Create a session file manually.
 Create a file `my_account.json` ( _the file name can be anything_ ) in the directory `/sessions` :
@@ -89,3 +90,6 @@ You can add more parameters that [pyrogram](https://github.com/pyrogram/pyrogram
     ...
 }
 ```
+
+## TODO:
+- code refactoring 🫣
