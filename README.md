@@ -29,7 +29,7 @@ _This script sends reactions to a new post or message in selected open groups an
 8. `mkdir sessions`
 9. **Sessions must be for [pyrogram](https://github.com/pyrogram/pyrogram)!** 
 
-    Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 7_ ). 
+    Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 8_ ). 
 
     **These two files must have the same name!** Here is an example:
 
