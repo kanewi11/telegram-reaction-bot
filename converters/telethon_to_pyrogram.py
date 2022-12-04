@@ -13,18 +13,20 @@ from telethon.tl.types import User
 
 class SessionConvertor:
     def __init__(self, session_path: Path, config: Dict, work_dir: Path):
-        self.session_path = session_path
+        if work_dir is None:
+            work_dir = Path(__file__).parent.parent.joinpath('sessions')
+        self.session_path = session_path if session_path else work_dir
         self.inappropriate_sessions_path = work_dir.joinpath('unnecessary_sessions')
-        self.api_id = config['api_id']
-        self.api_hash = config['api_hash']
+        self.api_id = config['api_id'] if config else None
+        self.api_hash = config['api_hash'] if config else None
         self.work_dir = work_dir
 
     async def convert(self) -> None:
         """Main func"""
         user_data, session_data = await self.__get_data_telethon_session()
-        converted_sting_session = await self.__get_converted_sting_session(session_data, user_data)
+        converted_sting_session = await self.get_converted_sting_session(session_data, user_data)
         await self.move_file_to_unnecessary(self.session_path)
-        await self.__save_pyrogram_session_file(converted_sting_session, session_data)
+        await self.save_pyrogram_session_file(converted_sting_session, session_data)
 
     async def move_file_to_unnecessary(self, file_path: Path):
         """Move the unnecessary Telethon session file to the directory with the unnecessary sessions"""
@@ -39,8 +41,8 @@ class SessionConvertor:
             session_data = StringSession(string_session)
             return user_data, session_data
 
-    async def __save_pyrogram_session_file(self, session_string: Union[str, Coroutine[Any, Any, str]],
-                                           session_data: StringSession):
+    async def save_pyrogram_session_file(self, session_string: Union[str, Coroutine[Any, Any, str]],
+                                         session_data: StringSession):
         """Create session file for pyrogram"""
         async with Client(self.session_path.stem, session_string=session_string, api_id=self.api_id,
                           api_hash=self.api_hash, workdir=self.work_dir.__str__()) as client:
@@ -57,7 +59,7 @@ class SessionConvertor:
             await client.storage.save()
 
     @staticmethod
-    async def __get_converted_sting_session(session_data: StringSession, user_data: User) -> str:
+    async def get_converted_sting_session(session_data: StringSession, user_data: User) -> str:
         """Convert to sting session"""
         pack = [
             Storage.SESSION_STRING_FORMAT,

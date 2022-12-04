@@ -10,7 +10,10 @@
    </a>
 </p>
 
+**Automatically converts TDATA to Pyrogram session!**
+
 **Automatically converts Telethon sessions to Pyrogram (may not be stable).**
+
 **As long as the configuration file has the same name as the session file (see below). If you do not comply, it will not work at all 🙃**
 
 _This script sends reactions to a new post or message in selected open groups and channels, as well as automatically subscribes to them._
@@ -23,27 +26,30 @@ _This script sends reactions to a new post or message in selected open groups an
 5. `pip install -r requirements.txt`
 6. Add your channel name to `config.py`
 7. `mkdir sessions`
-8. **Sessions must be for [pyrogram](https://github.com/pyrogram/pyrogram)!** 
+   8. **Sessions must be for [pyrogram](https://github.com/pyrogram/pyrogram)!** 
 
-    Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 7_ ). 
+       Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 7_ ). 
 
-    **These two files must have the same name!** Here is an example:
+       **These two files must have the same name!** Here is an example:
 
-    ```
-   your_dir
-   └───reactionbot.py
-   │
-   └───sessions
-   │   │   8888888888.ini
-   │   │   8888888888.session
-   │   │   9999999999.ini
-   │   │   9999999999.session
-   │   │   98767242365.json
-   │   │   98767242365.session
-   │   │   ...
-   │
-   ...
-    ```
+       ```
+      your_dir
+      └───reactionbot.py
+      │
+      └───sessions
+      │   │   8888888888.ini
+      │   │   8888888888.session
+      │   │   9999999999.ini
+      │   │   9999999999.session
+      │   │   98767242365.json
+      │   │   98767242365.session
+      │   │   ...
+      │
+      └───tdatas
+      │   └───your_tdata
+      │   │   │ ...
+      ...
+       ```
 9. `nohup python reactionbot.py &`
 
 ## Create a session file manually.

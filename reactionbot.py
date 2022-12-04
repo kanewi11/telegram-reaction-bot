@@ -1,4 +1,3 @@
-import sys
 import json
 import time
 import random
@@ -17,20 +16,24 @@ from pyrogram import Client, idle, filters, types
 from pyrogram.errors.exceptions.unauthorized_401 import UserDeactivatedBan
 
 from config import CHANNELS, POSSIBLE_KEY_NAMES, EMOJIS
-from convertor import SessionConvertor
+from converters import SessionConvertor, convert_tdata
 
 
 TRY_AGAIN_SLEEP = 20
 
-BASE_DIR = Path(sys.argv[0]).parent
+BASE_DIR = Path(__file__).parent
 WORK_DIR = BASE_DIR.joinpath('sessions')
+TDATAS_DIR = BASE_DIR.joinpath('tdatas')
+SUCCESS_CONVERT_TDATA_DIR = TDATAS_DIR.joinpath('success')
+UNSUCCESSFUL_CONVERT_TDATA_DIR = TDATAS_DIR.joinpath('unsuccessful')
+
 BANNED_SESSIONS_DIR = WORK_DIR.joinpath('banned_sessions')
 UNNECESSARY_SESSIONS_DIR = WORK_DIR.joinpath('unnecessary_sessions')
 
 CONFIG_FILE_SUFFIXES = ('.ini', '.json')
 
 logging.basicConfig(filename='logs.log', level=logging.WARNING, format='%(asctime)s %(levelname)s %(message)s')
-logging.info('Start reaction bot.')
+logging.warning('Start reaction bot.')
 
 
 async def send_reaction(client: Client, message: types.Message) -> None:
@@ -38,7 +41,6 @@ async def send_reaction(client: Client, message: types.Message) -> None:
     emoji = random.choice(EMOJIS)
     try:
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
-
     except ReactionInvalid:
         logging.warning(f'{emoji} - INVALID REACTION')
     except UserDeactivatedBan:
@@ -52,6 +54,9 @@ async def make_work_dir() -> None:
     WORK_DIR.mkdir(exist_ok=True)
     UNNECESSARY_SESSIONS_DIR.mkdir(exist_ok=True)
     BANNED_SESSIONS_DIR.mkdir(exist_ok=True)
+    TDATAS_DIR.mkdir(exist_ok=True)
+    SUCCESS_CONVERT_TDATA_DIR.mkdir(exist_ok=True)
+    UNSUCCESSFUL_CONVERT_TDATA_DIR.mkdir(exist_ok=True)
 
 
 async def get_config_files_path() -> List[Path]:
@@ -107,7 +112,7 @@ async def create_apps(config_files_paths: List[Path]) -> List[Tuple[Client, Dict
     return apps
 
 
-async def try_convert(session_path: Path, config: Dict):
+async def try_convert(session_path: Path, config: Dict) -> bool:
     """Try to convert the session if the session failed to start in Pyrogram"""
     convertor = SessionConvertor(session_path, config, WORK_DIR)
     try:
@@ -120,18 +125,34 @@ async def try_convert(session_path: Path, config: Dict):
             if config_file_path.exists():
                 await convertor.move_file_to_unnecessary(config_file_path)
         logging.warning('Preservation of the session failed ' + session_path.stem)
+        return False
+    except Exception:
+        return False
+    else:
+        return True
+
+
+def get_tdatas_paths() -> List[Path]:
+    """Get paths to tdata dirs"""
+    reserved_dirs = [SUCCESS_CONVERT_TDATA_DIR, UNSUCCESSFUL_CONVERT_TDATA_DIR]
+    return [path for path in TDATAS_DIR.iterdir() if path not in reserved_dirs]
 
 
 async def move_session_to_ban_dir(session_path: Path):
     """Move file to ban dir"""
+
     if session_path.exists():
-        session_path.rename(BANNED_SESSIONS_DIR.joinpath(session_path.name))
+        await move_file(session_path, BANNED_SESSIONS_DIR)
 
     for suffix in CONFIG_FILE_SUFFIXES:
         config_file_path = session_path.with_suffix(suffix)
         if not config_file_path.exists():
             continue
-        config_file_path.rename(BANNED_SESSIONS_DIR.joinpath(config_file_path.name))
+        await move_file(config_file_path, BANNED_SESSIONS_DIR)
+
+
+async def move_file(path_from: Path, path_to: Path):
+    path_from.rename(path_to.joinpath(path_from.name))
 
 
 async def main():
@@ -146,6 +167,15 @@ async def main():
 
     await make_work_dir()
     config_files = await get_config_files_path()
+    tdatas_paths = get_tdatas_paths()
+    for tdata_path in tdatas_paths:
+        try:
+            await convert_tdata(tdata_path, WORK_DIR)
+        except Exception:
+            logging.warning(traceback.format_exc())
+            await move_file(tdata_path, UNSUCCESSFUL_CONVERT_TDATA_DIR)
+        else:
+            await move_file(tdata_path, SUCCESS_CONVERT_TDATA_DIR)
 
     apps = await create_apps(config_files)
     if not apps:
@@ -158,9 +188,17 @@ async def main():
         try:
             await app.start()
         except OperationalError:
-            await try_convert(session_file_path, config_dict)
-            apps.remove((app, config_dict, session_file_path))
-            continue
+            is_converted = await try_convert(session_file_path, config_dict)
+            if not is_converted:
+                apps.remove((app, config_dict, session_file_path))
+                continue
+            try:
+                app = Client(workdir=WORK_DIR.__str__(), **config_dict)
+                await app.start()
+            except Exception:
+                logging.warning(traceback.format_exc())
+            else:
+                apps.append((app, config_dict, session_file_path))
         except UserDeactivatedBan:
             await move_session_to_ban_dir(session_file_path)
             logging.warning('Session banned - ' + app.name)
@@ -180,7 +218,11 @@ async def main():
     await idle()
 
     for app, _, _ in apps:
-        await app.stop()
+        try:
+            logging.warning(f'Stopped - {app.name}')
+            await app.stop()
+        except ConnectionError:
+            pass
 
 
 def start():
@@ -191,7 +233,7 @@ def start():
         loop.run_until_complete(main())
     except Exception:
         logging.critical(traceback.format_exc())
-        logging.info(f'Waiting {TRY_AGAIN_SLEEP} sec. before restarting the program...')
+        logging.warning(f'Waiting {TRY_AGAIN_SLEEP} sec. before restarting the program...')
         time.sleep(TRY_AGAIN_SLEEP)
 
 

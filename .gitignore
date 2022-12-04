@@ -13,6 +13,8 @@
 .idea/**/dictionaries
 .idea/**/shelf
 
+tdatas
+tdatas/*
 test_sessions/*
 sessions/*
 test.py
