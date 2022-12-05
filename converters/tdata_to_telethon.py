@@ -3,7 +3,6 @@ import json
 import os
 import struct
 import hashlib
-import asyncio
 import ipaddress
 from typing import Union
 from pathlib import Path
