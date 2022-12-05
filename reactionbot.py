@@ -7,10 +7,10 @@ import traceback
 import configparser
 from pathlib import Path
 from sqlite3 import OperationalError
-from typing import List, Dict, Tuple
+from typing import List, Dict, Union
 
 import uvloop
-from pyrogram.errors import ReactionInvalid
+from pyrogram.errors import ReactionInvalid, UserNotParticipant
 from pyrogram.handlers import MessageHandler
 from pyrogram import Client, idle, filters, types
 from pyrogram.errors.exceptions.unauthorized_401 import UserDeactivatedBan
@@ -50,18 +50,64 @@ for logger_name in loggers:
 error = logging.getLogger('warning')
 info = logging.getLogger('info')
 
+apps = []
+processed_post = []
+
 
 async def send_reaction(client: Client, message: types.Message) -> None:
     """Handler for sending reactions"""
     emoji = random.choice(EMOJIS)
     try:
+        random_sleep_time = random.randint(1, 5)
+        await asyncio.sleep(random_sleep_time)
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
     except ReactionInvalid:
-        error.warning(f'{emoji} - INVALID REACTION')
+        info.warning(f'{emoji} - invalid reaction')
     except UserDeactivatedBan:
-        error.warning('Session banned - ' + client.name)
+        info.warning(f'Session banned - {client.name}')
     except Exception:
         error.warning(traceback.format_exc())
+    else:
+        info.info(f'Session {client.name} send - {emoji}')
+
+
+async def send_reaction_from_all_applications(_, message: types.Message) -> None:
+    """
+    What is it for? Why not just assign a handler function to each app?
+
+    The answer is simple, if several sessions have the same API_ID and API_HASH,
+    only one of those sessions will send a response!
+    """
+    post = (message.chat.id, message.id)
+    if post in processed_post:
+        return
+    processed_post.append(post)
+
+    for app, _, _ in apps:
+        await send_reaction(app, message)
+
+
+async def get_chat_id(app: Client, chat_link: str) -> Union[int, str, None]:
+    """Return chat_id or None or raise AttributeError"""
+    try:
+        chat = await app.get_chat(chat_link)
+    except:
+        return None
+    else:
+        return chat.id
+
+
+async def is_subscribed(app: Client, chat_link: str) -> bool:
+    """Check if the channel is subscribed"""
+    try:
+        chat_id = await get_chat_id(app, chat_link)
+        if chat_id is None:
+            return False
+        await app.get_chat_member(chat_id, 'me')
+    except (UserNotParticipant, AttributeError):
+        return False
+    else:
+        return True
 
 
 async def make_work_dir() -> None:
@@ -111,12 +157,11 @@ async def get_config(file_path: Path) -> Dict:
     return normalized_confing
 
 
-async def create_apps(config_files_paths: List[Path]) -> List[Tuple[Client, Dict, Path]]:
+async def create_apps(config_files_paths: List[Path]) -> None:
     """
     Create 'Client' instances from config files.
     **If there is no name key in the config file, then the config file has the same name as the session!**
     """
-    apps = []
     for config_file_path in config_files_paths:
         try:
             config_dict = await get_config(config_file_path)
@@ -124,7 +169,6 @@ async def create_apps(config_files_paths: List[Path]) -> List[Tuple[Client, Dict
             apps.append((Client(workdir=WORK_DIR.__str__(), **config_dict), config_dict, session_file_path))
         except Exception:
             error.warning(traceback.format_exc())
-    return apps
 
 
 async def try_convert(session_path: Path, config: Dict) -> bool:
@@ -168,6 +212,7 @@ async def move_session_to_ban_dir(session_path: Path):
 
 
 async def move_file(path_from: Path, path_to: Path):
+    """File or directory relocation"""
     path_from.rename(path_to.joinpath(path_from.name))
 
 
@@ -182,7 +227,7 @@ async def main():
     """
 
     await make_work_dir()
-    config_files = await get_config_files_path()
+
     tdatas_paths = get_tdatas_paths()
     for tdata_path in tdatas_paths:
         try:
@@ -193,12 +238,13 @@ async def main():
         else:
             await move_file(tdata_path, SUCCESS_CONVERT_TDATA_DIR)
 
-    apps = await create_apps(config_files)
+    config_files = await get_config_files_path()
+    await create_apps(config_files)
     if not apps:
         raise Exception('No apps!')
 
+    message_handler = MessageHandler(send_reaction_from_all_applications, filters=filters.chat(CHANNELS))
     for app, config_dict, session_file_path in apps:
-        message_handler = MessageHandler(send_reaction, filters=filters.chat(CHANNELS))
         app.add_handler(message_handler)
 
         try:
@@ -207,6 +253,7 @@ async def main():
             is_converted = await try_convert(session_file_path, config_dict)
             apps.remove((app, config_dict, session_file_path))
             if not is_converted:
+                info.info(f'Did not convert - {app.name}')
                 continue
             try:
                 app = Client(workdir=WORK_DIR.__str__(), **config_dict)
@@ -218,7 +265,7 @@ async def main():
                 apps.append((app, config_dict, session_file_path))
         except UserDeactivatedBan:
             await move_session_to_ban_dir(session_file_path)
-            error.warning('Session banned - ' + app.name)
+            error.info(f'Session banned - {app.name}')
             apps.remove((app, config_dict, session_file_path))
             continue
         except Exception:
@@ -226,14 +273,19 @@ async def main():
             error.warning(traceback.format_exc())
             continue
 
-        info.info('Session started - ' + app.name)
+        info.info(f'Session started - {app.name}')
         for channel in CHANNELS:
-            await app.join_chat(channel)
+            subscribed = await is_subscribed(app, channel)
+            if not subscribed:
+                random_sleep_time = random.randint(1, 10)
+                await asyncio.sleep(random_sleep_time)
+                await app.join_chat(channel)
+                info.info(f'{app.name} joined - "@{channel}"')
 
     if not apps:
         raise Exception('No apps!')
 
-    info.info('All sessions started!')
+    info.warning('All sessions started!')
     await idle()
 
     for app, _, _ in apps:
