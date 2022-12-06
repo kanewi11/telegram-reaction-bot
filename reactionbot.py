@@ -259,6 +259,7 @@ async def main():
                 app = Client(workdir=WORK_DIR.__str__(), **config_dict)
                 app.add_handler(message_handler)
                 await app.start()
+
             except Exception:
                 error.warning(traceback.format_exc())
             else:
@@ -294,6 +295,7 @@ async def main():
             await app.stop()
         except ConnectionError:
             pass
+    apps[:] = []
 
 
 def start():
