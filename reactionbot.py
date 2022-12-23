@@ -42,7 +42,7 @@ for logger_name in loggers:
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
     log_filepath = LOGS_DIR.joinpath(logger_name + '.log')
-    handler = logging.FileHandler(log_filepath, mode='w')
+    handler = logging.FileHandler(log_filepath)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
     logger.warning('Start reaction bot.')
