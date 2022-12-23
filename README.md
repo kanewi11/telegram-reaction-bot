@@ -20,18 +20,15 @@ _This script sends reactions to a new post or message in selected open groups an
 
 ## Launch Instructions
 1. Create an empty directory
-2. `git clone https://github.com/kanewi11/telegram-reaction-bot.git ./`
-3. `python3 -m venv venv`
-4. `source venv/bin/activate`
-5. `pip install -r requirements.txt`
-6. Add your channel name to `config.py`
-7. **IF YOU PLAN TO USE THE TDATA CONVERTER** go to the file `converters/tdata_to_telethon.py` and insert your `API_HASH` and `API_ID` (lines 19 and 20)
-8. `mkdir sessions`
-9. **Sessions must be for [pyrogram](https://github.com/pyrogram/pyrogram)!** 
-
-    Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 8_ ). 
-
-    **These two files must have the same name!** Here is an example:
+2. `git clone https://github.com/kanewi11/telegram-reaction-bot.git ./`.
+3. `python3 -m venv venv`.
+4. `source venv/bin/activate`.
+5. `pip install -r requirements.txt`.
+6. Add your channel name to `config.py`.
+7. **If you plan to use the TDATA converter**, go to `converters/tdata_to_telethon.py` and insert your `API_HASH` and `API_ID` (lines 19 and 20).
+8. `mkdir sessions` and `mkdir tdatas`
+9. Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 8_ ) or tdata files to the `/tdatas` folder (**Note the 7th point**). 
+Here is an example:
 
    ```
       your_dir
@@ -47,7 +44,8 @@ _This script sends reactions to a new post or message in selected open groups an
       │   │   ...
       │
       └───tdatas
-      │   └───your_tdata
+      │   └─── my_tdata
+      │   │   │ key_datas
       │   │   │ ...
       ...
    ```
