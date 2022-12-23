@@ -10,13 +10,11 @@
    </a>
 </p>
 
-**Automatically converts TDATA to Pyrogram session!**
+This bot sends a reaction to a new post or message in selected public groups and channels, and automatically subscribes to them.
 
-**Automatically converts Telethon sessions to Pyrogram (may not be stable).**
-
-**As long as the configuration file has the same name as the session file (see below). If you do not comply, it will not work at all 🙃**
-
-_This script sends reactions to a new post or message in selected open groups and channels, as well as automatically subscribes to them._
+**Good stuff:**
+* Automatically converts `TDATA` to a Pyrogram session.
+* Automatically converts a `Telethon session` to a Pyrogram.
 
 ## Launch Instructions
 1. Create an empty directory
