@@ -24,7 +24,7 @@ This bot sends a reaction to a new post or message in selected public groups and
 5. `pip install -r requirements.txt`.
 6. Add your channel name to `config.py`.
 7. **If you plan to use the TDATA converter**, go to `converters/tdata_to_telethon.py` and insert your `API_HASH` and `API_ID` (lines 19 and 20).
-8. `mkdir sessions` and `mkdir tdatas`
+8. `mkdir sessions` and `mkdir tdatas` _(or just create these two folders)_
 9. Add the session file and its configuration file to the `/sessions` directory ( _which we created in step 8_ ) or tdata files to the `/tdatas` folder (**Note the 7th point**). 
 Here is an example:
 
