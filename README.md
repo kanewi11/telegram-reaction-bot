@@ -64,12 +64,15 @@ After `$ python reactionbot.py`, in the console go through the account authoriza
 ## Where do I get `api_id` and `api_hash`?
 [🔗 Click me.](https://my.telegram.org/auth)
 
-## Sample configuration file *.ini
+## Sample configuration file
 You can add more parameters that [pyrogram](https://github.com/pyrogram/pyrogram) supports.
+
+`sessions/888888888.ini`
 ```
 [pyrogram]
 api_id = your_api_id
-api_hash = your_api_hash	
+api_hash = your_api_hash
+phone_number = 888888888
 
 # optional parameters
 app_version = '8.8.5'
@@ -77,15 +80,14 @@ device_model = 'Vertu IVERTU'
 system_version = 'Android'
 ```
 
-## Sample configuration file *.json
-You can add more parameters that [pyrogram](https://github.com/pyrogram/pyrogram) supports.
+**OR** ( select one of the variants of the configuration file )
+
+`sessions/888888888.json`
 ```
 {
     "api_id": "your_api_id",
     "api_hash": "your_api_hash",
+    "phone_number": "your_phone_number",
     ...
 }
 ```
-
-## TODO:
-- code refactoring 🫣
