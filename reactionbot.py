@@ -62,9 +62,9 @@ async def send_reaction(client: Client, message: types.Message) -> None:
         await asyncio.sleep(random_sleep_time)
         await client.send_reaction(chat_id=message.chat.id, message_id=message.id, emoji=emoji)
     except ReactionInvalid:
-        info.warning(f'{emoji} - invalid reaction')
+        error.warning(f'{emoji} - invalid reaction')
     except UserDeactivatedBan:
-        info.warning(f'Session banned - {client.name}')
+        error.warning(f'Session banned - {client.name}')
     except Exception:
         error.warning(traceback.format_exc())
     else:
@@ -266,7 +266,7 @@ async def main():
                 apps.append((app, config_dict, session_file_path))
         except UserDeactivatedBan:
             await move_session_to_ban_dir(session_file_path)
-            error.info(f'Session banned - {app.name}')
+            error.warning(f'Session banned - {app.name}')
             apps.remove((app, config_dict, session_file_path))
             continue
         except Exception:
