@@ -47,7 +47,7 @@ for logger_name in loggers:
     logger.addHandler(handler)
     logger.warning('Start reaction bot.')
 
-error = logging.getLogger('warning')
+error = logging.getLogger('error')
 info = logging.getLogger('info')
 
 apps = []
