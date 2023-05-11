@@ -89,7 +89,7 @@ async def send_reaction_from_all_applications(_, message: types.Message) -> None
 
     processed_post.append(post)
 
-    if this_media_id == message.media_group_id:
+    if this_media_id == message.media_group_id and message.media_group_id is not None:
         return
 
     this_media_id = message.media_group_id
