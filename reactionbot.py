@@ -38,6 +38,8 @@ LOGS_DIR.mkdir(exist_ok=True)
 loggers = ['info', 'error']
 formatter = logging.Formatter('%(name)s %(asctime)s %(levelname)s %(message)s')
 
+this_media_id = None
+
 for logger_name in loggers:
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
@@ -78,10 +80,19 @@ async def send_reaction_from_all_applications(_, message: types.Message) -> None
     The answer is simple, if several sessions have the same API_ID and API_HASH,
     only one of those sessions will send a response!
     """
+
+    global this_media_id
+
     post = (message.chat.id, message.id)
     if post in processed_post:
         return
+
     processed_post.append(post)
+
+    if this_media_id == message.media_group_id:
+        return
+
+    this_media_id = message.media_group_id
 
     for app, _, _ in apps:
         await send_reaction(app, message)
