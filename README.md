@@ -11,15 +11,16 @@
 </p>
 
 Bot puts reaction to new posts in the channel, group or chat. Reactions are set from all connected sessions, as well as automatic subscription to channels from these sessions!
-**Good stuff:**
-* Automatically converts `TDATA` to a Pyrogram session.
-* Automatically converts a `Telethon session` to a Pyrogram.
+
+**Good stuff 👍:**
+* Automatically converts `TDATA to a Pyrogram session`.
+* Automatically converts a `Telethon session to a Pyrogram session`.
 
 ## Launch Instructions
 1. Create an empty directory
 2. `git clone https://github.com/kanewi11/telegram-reaction-bot.git ./`.
-3. `python3 -m venv venv`.
-4. `source venv/bin/activate`.
+3. `python3 -m venv venv` or on windows `python -m venv venv`.
+4. `. venv/bin/activate` or on windows `\venv\Scripts\activate`.
 5. `pip install -r requirements.txt`.
 6. Add your channel name to `config.py`.
 7. **If you plan to use the TDATA converter**, go to `converters/tdata_to_telethon.py` and insert your `API_HASH` and `API_ID` (lines 19 and 20).
@@ -58,7 +59,7 @@ Create a file `my_account.json` ( _the file name can be anything_ ) in the direc
 }
 ```
 
-After `$ python reactionbot.py`, in the console go through the account authorization steps and that's it, the session file will be created, you don't need to do this for the next times.
+After `python reactionbot.py`, in the console go through the account authorization steps and that's it, the session file will be created, you don't need to do this for the next times.
 
 ## Where do I get `api_id` and `api_hash`?
 [🔗 Click me.](https://my.telegram.org/auth)
