@@ -10,8 +10,7 @@
    </a>
 </p>
 
-This bot sends a reaction to a new post or message in selected public groups and channels, and automatically subscribes to them.
-
+Bot puts reaction to new posts in the channel, group or chat. Reactions are set from all connected sessions, as well as automatic subscription to channels from these sessions!
 **Good stuff:**
 * Automatically converts `TDATA` to a Pyrogram session.
 * Automatically converts a `Telethon session` to a Pyrogram.
