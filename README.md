@@ -21,7 +21,7 @@ Bot puts reaction to new posts in the channel, group or chat. Reactions are set 
 2. `git clone https://github.com/kanewi11/telegram-reaction-bot.git ./`.
 3. `python3 -m venv venv` or on windows `python -m venv venv`.
 4. `. venv/bin/activate` or on windows `\venv\Scripts\activate`.
-5. `pip install -r requirements.txt`.
+5. `pip install -r requirements.txt` or in windows `pip install -r requirements_win.txt`.
 6. Add your channel name to `config.py`.
 7. **If you plan to use the TDATA converter**, go to `converters/tdata_to_telethon.py` and insert your `API_HASH` and `API_ID` (lines 19 and 20).
 8. `mkdir sessions` and `mkdir tdatas` _(or just create these two folders)_
