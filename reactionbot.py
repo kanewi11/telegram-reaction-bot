@@ -3,13 +3,13 @@ import time
 import random
 import asyncio
 import logging
+import platform
 import traceback
 import configparser
 from pathlib import Path
 from sqlite3 import OperationalError
 from typing import List, Dict, Union
 
-import uvloop
 from pyrogram.errors import ReactionInvalid, UserNotParticipant
 from pyrogram.handlers import MessageHandler
 from pyrogram import Client, idle, filters, types
@@ -17,6 +17,11 @@ from pyrogram.errors.exceptions.unauthorized_401 import UserDeactivatedBan
 
 from config import CHANNELS, POSSIBLE_KEY_NAMES, EMOJIS
 from converters import SessionConvertor, convert_tdata
+
+
+if platform.system() != 'Windows':
+    import uvloop
+    uvloop.install()
 
 
 TRY_AGAIN_SLEEP = 20
@@ -53,7 +58,7 @@ error = logging.getLogger('error')
 info = logging.getLogger('info')
 
 apps = []
-processed_post = []
+sent = []
 
 
 async def send_reaction(client: Client, message: types.Message) -> None:
@@ -81,13 +86,12 @@ async def send_reaction_from_all_applications(_, message: types.Message) -> None
     only one of those sessions will send a response!
     """
 
-    global this_media_id
+    global this_media_id  # sorry :)
 
     post = (message.chat.id, message.id)
-    if post in processed_post:
+    if post in sent:
         return
-
-    processed_post.append(post)
+    sent.append(post)
 
     if this_media_id == message.media_group_id and message.media_group_id is not None:
         return
@@ -311,7 +315,6 @@ async def main():
 
 def start():
     """Let's start"""
-    uvloop.install()
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(main())
