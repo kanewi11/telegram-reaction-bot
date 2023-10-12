@@ -32,8 +32,7 @@ class QDataStream:
         self.stream = io.BytesIO(data)
 
     def read(self, n=None):
-        if n < 0:
-            n = 0
+        n = max(n, 0)
         data = self.stream.read(n)
         if n != 0 and len(data) == 0:
             return None
@@ -53,38 +52,25 @@ class QDataStream:
 
     def read_uint32(self):
         data = self.read(4)
-        if data is None:
-            return None
-        return int.from_bytes(data, 'big')
+        return None if data is None else int.from_bytes(data, 'big')
 
     def read_uint64(self):
         data = self.read(8)
-        if data is None:
-            return None
-        return int.from_bytes(data, 'big')
+        return None if data is None else int.from_bytes(data, 'big')
 
     def read_int32(self):
         data = self.read(4)
-        if data is None:
-            return None
-        return int.from_bytes(data, 'big', signed=True)
+        return None if data is None else int.from_bytes(data, 'big', signed=True)
 
 
 def create_local_key(passcode, salt):
-    if passcode:
-        iterations = 100_000
-    else:
-        iterations = 1
+    iterations = 100_000 if passcode else 1
     _hash = hashlib.sha512(salt + passcode + salt).digest()
     return hashlib.pbkdf2_hmac('sha512', _hash, salt, iterations, 256)
 
 
 def prepare_aes_oldmtp(auth_key, msg_key, send):
-    if send:
-        x = 0
-    else:
-        x = 8
-
+    x = 0 if send else 8
     sha1 = hashlib.sha1()
     sha1.update(msg_key)
     sha1.update(auth_key[x:][:32])
@@ -193,7 +179,7 @@ def build_session(dc, ip, port, key):
     ip_bytes = ipaddress.ip_address(ip).packed
     data = struct.pack('>B4sH256s', dc, ip_bytes, port, key)
     encoded_data = urlsafe_b64encode(data).decode('ascii')
-    return '1' + encoded_data
+    return f'1{encoded_data}'
 
 
 async def convert_tdata(path: Union[str, Path], work_dir: Path):
@@ -224,7 +210,7 @@ async def convert_tdata(path: Union[str, Path], work_dir: Path):
 
 
 def save_config(work_dir: Path, phone: str, config: dict):
-    config_path = work_dir.joinpath(phone + '.json')
+    config_path = work_dir.joinpath(f'{phone}.json')
     with open(config_path, 'w') as config_file:
         json.dump(config, config_file)
 
