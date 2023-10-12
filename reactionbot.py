@@ -48,7 +48,7 @@ this_media_id = None
 for logger_name in loggers:
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
-    log_filepath = LOGS_DIR.joinpath(logger_name + '.log')
+    log_filepath = LOGS_DIR.joinpath(f'{logger_name}.log')
     handler = logging.FileHandler(log_filepath)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -198,7 +198,7 @@ async def try_convert(session_path: Path, config: Dict) -> bool:
             config_file_path = session_path.with_suffix(suffix)
             if config_file_path.exists():
                 await convertor.move_file_to_unnecessary(config_file_path)
-        error.warning('Preservation of the session failed ' + session_path.stem)
+        error.warning(f'Preservation of the session failed {session_path.stem}')
         return False
     except Exception:
         error.warning(traceback.format_exc())

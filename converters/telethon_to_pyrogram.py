@@ -77,5 +77,4 @@ class SessionConvertor:
 
         encode_pack = base64.urlsafe_b64encode(bytes_pack)
         decode_pack = encode_pack.decode()
-        sting_session = decode_pack.rstrip("=")
-        return sting_session
+        return decode_pack.rstrip("=")
